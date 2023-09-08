@@ -276,3 +276,259 @@ public class StudentConverterTest {
 In this test case, the assertThrows method from JUnit 5 is used to assert that a NullPointerException is thrown when null is passed as the argument to the convertStudents method. The lambda expression () -> studentConverter.convertStudents(null) represents the action of calling the convertStudents method with null, and we expect it to throw a NullPointerException.
 
 If your method handles the null case differently (perhaps throwing a different exception or returning a special value), you would adjust the test to check for that behavior instead.
+
+
+Based on the following code:
+
+public class Player {
+
+    public String name;
+    public int age;
+    public int experience;
+    public List<Integer> skills;
+
+    //Getters
+    //Setters
+}
+
+public class PlayerAnalyzer {
+
+    public double calculateScore(List<Player> players) {
+        double score = 0;
+
+        for (Player player : players) {
+            double skillsAverage = player.getSkills().stream().mapToInt(Integer::intValue).sum() / (double) player.getSkills().size();
+            double contribution = player.getAge() * player.getExperience() * skillsAverage;
+
+            if (player.getAge() < 18) {
+                contribution *= 0.5;
+            }
+
+            if (player.getExperience() > 10) {
+                contribution *= 1.2;
+            }
+
+            score += contribution;
+        }
+
+        return score;
+    }
+}
+ could you create unit tests for PlayerAnalyzer class
+ChatGPT
+
+Certainly! Here's how you might write unit tests for the PlayerAnalyzer class using the JUnit framework:
+
+java
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.util.Arrays;
+import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+public class PlayerAnalyzerTest {
+
+    private PlayerAnalyzer playerAnalyzer;
+
+    @BeforeEach
+    public void setup() {
+        playerAnalyzer = new PlayerAnalyzer();
+    }
+
+    @Test
+    public void testCalculateScore_noPlayers() {
+        List<Player> players = Arrays.asList();
+        double result = playerAnalyzer.calculateScore(players);
+        assertEquals(0, result);
+    }
+
+    @Test
+    public void testCalculateScore_singlePlayer() {
+        Player player = new Player();
+        player.setAge(20);
+        player.setExperience(5);
+        player.setSkills(Arrays.asList(1, 2, 3, 4, 5));
+
+        List<Player> players = Arrays.asList(player);
+
+        double result = playerAnalyzer.calculateScore(players);
+        double expected = 20 * 5 * 3; // age * experience * average of skills
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void testCalculateScore_multiplePlayers() {
+        Player player1 = new Player();
+        player1.setAge(20);
+        player1.setExperience(5);
+        player1.setSkills(Arrays.asList(1, 2, 3, 4, 5));
+
+        Player player2 = new Player();
+        player2.setAge(17);
+        player2.setExperience(3);
+        player2.setSkills(Arrays.asList(3, 4, 5, 6, 7));
+
+        List<Player> players = Arrays.asList(player1, player2);
+
+        double result = playerAnalyzer.calculateScore(players);
+        double expected = (20 * 5 * 3) + ((17 * 3 * 5) * 0.5); // contribution of player1 + contribution of player2 (with age < 18 penalty)
+        assertEquals(expected, result);
+    }
+
+    @Test
+    public void testCalculateScore_experienceBonus() {
+        Player player = new Player();
+        player.setAge(30);
+        player.setExperience(15);
+        player.setSkills(Arrays.asList(2, 4, 6, 8, 10));
+
+        List<Player> players = Arrays.asList(player);
+
+        double result = playerAnalyzer.calculateScore(players);
+        double expected = (30 * 15 * 6) * 1.2; // age * experience * average of skills (with experience > 10 bonus)
+        assertEquals(expected, result);
+    }
+}
+
+Explanation of each test case:
+
+    testCalculateScore_noPlayers: Tests the method with an empty list of players. The expected result is 0.
+    testCalculateScore_singlePlayer: Tests the method with a single player and calculates the expected score based on the properties of that player.
+    testCalculateScore_multiplePlayers: Tests the method with two players, including one with an age under 18, so we apply the age penalty to that player's contribution to the score.
+    testCalculateScore_experienceBonus: Tests the method with a player who has more than 10 years of experience, so we apply the experience bonus to that player's contribution to the score.
+
+Make sure to import the necessary packages and set up the getters and setters in your Player class before running the tests.
+User
+could you create cases for the following:
+Positive Test Cases:
+Case 1: Normal Player
+Given an array with a single player object with age 25, experience 5 years, and skills [2, 2, 2], the function should return a score of 250 (since 2552 = 250).
+Case 2: Junior Player
+Given an array with a single player object with age 15, experience 3 years, and skills [3, 3, 3], the function should return a score of 67.5 (since (1533) *0.5 = 67.5).
+Case 3: Senior Player
+Given an array with a single player object with age 35, experience 15 years, and skills [4, 4, 4], the function should return a score of 2520 (since (35154) *1.2 = 2520).
+Case 4: Multiple Players
+Given an array with multiple player objects, the function should return the sum of their scores.
+Negative Test Cases:
+Case 1: Skills is null.
+Given an array with a player where Skills property is null, the function should throw an error.
+Case 2: Empty Array
+Given an empty array, the function should return 0 (since there are no players to contribute to the score).
+ChatGPT
+
+Sure, here is how you can create test cases to cover these scenarios:
+
+java
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import java.util.Arrays;
+import java.util.List;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+public class PlayerAnalyzerTest {
+
+    private PlayerAnalyzer playerAnalyzer;
+
+    @BeforeEach
+    public void setup() {
+        playerAnalyzer = new PlayerAnalyzer();
+    }
+
+    @Test
+    public void testCase1_NormalPlayer() {
+        Player player = new Player();
+        player.setAge(25);
+        player.setExperience(5);
+        player.setSkills(Arrays.asList(2, 2, 2));
+
+        List<Player> players = Arrays.asList(player);
+
+        double result = playerAnalyzer.calculateScore(players);
+        assertEquals(250, result);
+    }
+
+    @Test
+    public void testCase2_JuniorPlayer() {
+        Player player = new Player();
+        player.setAge(15);
+        player.setExperience(3);
+        player.setSkills(Arrays.asList(3, 3, 3));
+
+        List<Player> players = Arrays.asList(player);
+
+        double result = playerAnalyzer.calculateScore(players);
+        assertEquals(67.5, result);
+    }
+
+    @Test
+    public void testCase3_SeniorPlayer() {
+        Player player = new Player();
+        player.setAge(35);
+        player.setExperience(15);
+        player.setSkills(Arrays.asList(4, 4, 4));
+
+        List<Player> players = Arrays.asList(player);
+
+        double result = playerAnalyzer.calculateScore(players);
+        assertEquals(2520, result);
+    }
+
+    @Test
+    public void testCase4_MultiplePlayers() {
+        Player player1 = new Player();
+        player1.setAge(25);
+        player1.setExperience(5);
+        player1.setSkills(Arrays.asList(2, 2, 2));
+
+        Player player2 = new Player();
+        player2.setAge(15);
+        player2.setExperience(3);
+        player2.setSkills(Arrays.asList(3, 3, 3));
+
+        List<Player> players = Arrays.asList(player1, player2);
+
+        double result = playerAnalyzer.calculateScore(players);
+        assertEquals(250 + 67.5, result);
+    }
+
+    @Test
+    public void negativeTestCase1_SkillsIsNull() {
+        Player player = new Player();
+        player.setAge(25);
+        player.setExperience(5);
+        player.setSkills(null);
+
+        List<Player> players = Arrays.asList(player);
+
+        assertThrows(NullPointerException.class, () -> {
+            playerAnalyzer.calculateScore(players);
+        });
+    }
+
+    @Test
+    public void negativeTestCase2_EmptyArray() {
+        List<Player> players = Arrays.asList();
+        double result = playerAnalyzer.calculateScore(players);
+        assertEquals(0, result);
+    }
+}
+
+Explanation:
+
+    testCase1_NormalPlayer: This case tests a "normal" player scenario, verifying that the score is computed correctly for a player with the given age, experience, and skills.
+
+    testCase2_JuniorPlayer: This case tests a "junior" player scenario, verifying that the age penalty is correctly applied.
+
+    testCase3_SeniorPlayer: This case tests a "senior" player scenario, verifying that the experience bonus is correctly applied.
+
+    testCase4_MultiplePlayers: This case tests a scenario with multiple players, verifying that the scores are summed correctly.
+
+    negativeTestCase1_SkillsIsNull: This case tests a scenario where the player's skills list is null, expecting a NullPointerException to be thrown when attempting to calculate the score.
+
+    negativeTestCase2_EmptyArray: This case tests a scenario where the players list is empty, expecting a score of 0 to be returned.
+
+Note: Before you run these test cases, ensure that your Player class has appropriate getters and setters methods implemented.
